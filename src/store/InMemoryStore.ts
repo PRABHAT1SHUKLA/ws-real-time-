@@ -6,7 +6,7 @@ export interface Room {
   chats: Chat[]
 }
 
-export class ImMemoryStore implements Store {
+export class InMemoryStore implements Store {
   private store: Map<string, Room>
 
   constructor() {
@@ -67,6 +67,6 @@ export class ImMemoryStore implements Store {
     return chat;
   }
   
-  
+
 
 }

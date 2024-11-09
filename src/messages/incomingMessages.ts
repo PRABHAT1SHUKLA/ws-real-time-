@@ -28,7 +28,8 @@ export type InitMessageType = z.infer<typeof InitMessage>;
 export const UserMessage = z.object({
   userId: z.string(),
   roomId: z.string(),
-  message: z.string()
+  message: z.string(),
+  name:z.string()
 })
 
 export type UserMessageType = z.infer<typeof UserMessage>;
