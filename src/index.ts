@@ -1,5 +1,6 @@
-import { server as WebSocketServer } from "websocket"
-import http from "http"
+import { connection, server as WebSocketServer } from "websocket"
+import http, { IncomingMessage } from "http"
+
 
 var server = http.createServer(function(request:any, response:any) {
     console.log((new Date()) + ' Received request for ' + request.url);
@@ -40,12 +41,14 @@ wsServer.on('request', function(request) {
             console.log('Received Message: ' + message.utf8Data);
             connection.sendUTF(message.utf8Data);
         }
-        else if (message.type === 'binary') {
-            console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-            connection.sendBytes(message.binaryData);
-        }
+       
     });
     connection.on('close', function(reasonCode, description) {
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
     });
 });
+
+
+function messageHandler(ws:connection , message:IncomingMessage){
+  if(message.type== SupportedMessage.JoinRoom)
+} 
