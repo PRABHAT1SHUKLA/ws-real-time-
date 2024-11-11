@@ -2,6 +2,7 @@
 export enum SupportedMessage {
   AddChat =  "ADD_CHAT",
   UpdateChat = "UPDATE_CHAT",
+  NewUser= "NEW_USER"
 }
 
 type MessagePayload = {
@@ -18,6 +19,9 @@ export type OutgoingMessage = {
 } | {
   type : SupportedMessage.UpdateChat,
   payload:Partial<MessagePayload>
+} | {
+   type: SupportedMessage.NewUser,
+   payload: string
 }
 
 

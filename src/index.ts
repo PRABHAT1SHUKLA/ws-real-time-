@@ -1,4 +1,4 @@
-import { connection, server as WebSocketServer } from "websocket"
+import { WebSocket, WebSocketServer } from "ws";
 import http from "http"
 import { IncomingMessage, SupportedMessage } from "./messages/incomingMessages";
 import { UserManager } from "./UserManager";
@@ -11,6 +11,7 @@ var server = http.createServer(function (request: any, response: any) {
   response.writeHead(404);
   response.end();
 });
+
 server.listen(8080, function () {
   console.log((new Date()) + ' Server is listening on port 8080');
 });
@@ -18,51 +19,39 @@ server.listen(8080, function () {
 const userManager = new UserManager();
 const store = new InMemoryStore();
 
-const wsServer = new WebSocketServer({
-  httpServer: server,
-  // You should not use autoAcceptConnections for production
-  // applications, as it defeats all standard cross-origin protection
-  // facilities built into the protocol and the browser.  You should
-  // *always* verify the connection's origin and decide whether or not
-  // to accept it.
-  autoAcceptConnections: false
-});
+console.log("about to socketify")
+const wss = new WebSocketServer({server})
+console.log('yeah')
 
 function originIsAllowed(origin: string) {
   // put logic here to detect whether the specified origin is allowed.
   return true;
 }
 
-wsServer.on('request', function (request) {
-  if (!originIsAllowed(request.origin)) {
-    // Make sure we only accept requests from an allowed origin
-    request.reject();
-    console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
-    return;
-  }
+wss.on('connection', (ws)=>{
+  console.log('Client connected')
 
-  var connection = request.accept('echo-protocol', request.origin);
-  console.log((new Date()) + ' Connection accepted.');
-  connection.on('message', function (message) {
-    if (message.type === 'utf8') {
-      try {
-        messageHandler(connection, JSON.parse(message.utf8Data));
-      } catch (e) {
+  ws.send("welcome to the websocket server")
 
-      }
-    }
-
-  });
-  connection.on('close', function (reasonCode, description) {
-    console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-  });
-});
+  ws.on('message', (data)=>{
+    console.log('Received Message =>', data)
+   try{
+    const message: IncomingMessage = JSON.parse(data.toString());
+    messageHandler(ws, message)
+   }catch(err){
+    console.log(err)
+   }
+  })
+} )
 
 
-function messageHandler(ws: connection, message: IncomingMessage) {
+function messageHandler(ws: WebSocket, message: IncomingMessage) {
   if (message.type == SupportedMessage.JoinRoom) {
     const payload = message.payload;
     userManager.addUser(payload.name, payload.userId, payload.roomId, ws);
+     
+
+    // userManager.broadCast(payload.userId, payload.roomId, )
   }
 
   if (message.type == SupportedMessage.SendMessage) {
@@ -89,7 +78,7 @@ function messageHandler(ws: connection, message: IncomingMessage) {
     }
 
     userManager.broadCast(payload.userId, payload.roomId, outgoingPayload)
-
+    console.log("broadcasted  messa")
   }
 
 

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node dist/index.js"
   },
   "keywords": [],
   "author": "",
@@ -11,7 +12,9 @@
   "description": "",
   "dependencies": {
     "@types/websocket": "^1.0.10",
+    "@types/ws": "^8.5.13",
     "websocket": "^1.0.35",
+    "ws": "^8.18.0",
     "zod": "^3.23.8"
   }
 }

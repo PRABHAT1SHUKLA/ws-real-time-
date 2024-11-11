@@ -1,10 +1,11 @@
-import { connection } from "websocket";
+
 import { OutgoingMessage } from "./messages/outgoingMessages";
+import { WebSocket } from "ws";
 
 interface User {
   name: string;
   id: string;
-  conn: connection;
+  conn: WebSocket;
 }
 
 interface Room {
@@ -18,7 +19,7 @@ export class UserManager {
     this.rooms = new Map<string, Room>()
   }
 
-  addUser(name: string, userId: string, roomId: string, socket: connection) {
+  addUser(name: string, userId: string, roomId: string, socket: WebSocket) {
     if (!this.rooms.get(roomId)) {
       this.rooms.set(roomId, {
         users: []
@@ -29,6 +30,24 @@ export class UserManager {
       name,
       conn: socket
     })
+    console.log("done")
+
+    const room = this.rooms.get(roomId)
+    if(!room){
+      console.error("room not there")
+      return 
+    }
+
+    room.users.forEach(({conn,id})=>{
+      // if(id==userId){
+      //   return ;
+      // }
+
+      console.log(`outgoing message -  user with ${id} joined ` )
+      conn.send(`income -  user with ${id } joined  fucllll`)
+    })
+
+    
     //connection object has various callbacks which are inbuilt in them , here in websocket connection object reasonCode and description are two callbacks
     socket.on("close", (reasonCode, description) => {
       this.removeUser(roomId, userId)
@@ -65,7 +84,9 @@ export class UserManager {
       }
 
       console.log("outgoing message " + JSON.stringify(message))
-      conn.sendUTF(JSON.stringify(message))
+      conn.send(JSON.stringify(message))
     })
+
+    console.log("broadcasted  message")
   }
 }
